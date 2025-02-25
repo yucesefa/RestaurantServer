@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantServer.API.DataAccess.Context;
 using RestaurantServer.API.DataAccess.Entities;
+using RestaurantServer.API.Dtos;
 
 namespace RestaurantServer.API.Controllers
 {
@@ -45,14 +46,20 @@ namespace RestaurantServer.API.Controllers
         // PUT: api/Categories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutCategory(int id, CategoryDto categoryDto)
         {
-            if (id != category.Id)
+            if (id != categoryDto.Id)
             {
                 return BadRequest();
             }
 
+            var category = new Category
+            {
+                Id = categoryDto.Id,
+                CategoryName = categoryDto.CategoryName
+            };
             _context.Entry(category).State = EntityState.Modified;
+
 
             try
             {
@@ -64,10 +71,8 @@ namespace RestaurantServer.API.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+              
             }
 
             return NoContent();
@@ -76,9 +81,14 @@ namespace RestaurantServer.API.Controllers
         // POST: api/Categories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<Category>> PostCategory(CategoryDto categoryDto)
         {
+            var category = new Category
+            {
+                CategoryName = categoryDto.CategoryName
+            };
             _context.Categories.Add(category);
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCategory", new { id = category.Id }, category);

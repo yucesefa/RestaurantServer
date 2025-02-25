@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantServer.API.DataAccess.Context;
 using RestaurantServer.API.DataAccess.Entities;
+using RestaurantServer.API.Dtos;
 
 namespace RestaurantServer.API.Controllers
 {
@@ -25,7 +26,7 @@ namespace RestaurantServer.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Menu>>> GetMenus()
         {
-            return await _context.Menus.ToListAsync();
+            return await _context.Menus.AsNoTracking().ToListAsync();
         }
 
         // GET: api/Menus/5
@@ -45,12 +46,25 @@ namespace RestaurantServer.API.Controllers
         // PUT: api/Menus/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMenu(int id, Menu menu)
+        public async Task<IActionResult> PutMenu(int id, MenuDto menuDto)
         {
-            if (id != menu.Id)
+            if (id != menuDto.Id)
             {
                 return BadRequest();
             }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);  
+            }
+            var menu = new Menu
+            {
+                Id = menuDto.Id,
+                ImageUrl = menuDto.ImageUrl,
+                Description = menuDto.Description,
+                Price = menuDto.Price,
+                Title = menuDto.Title,
+                CategoryId = menuDto.CategoryId
+            };
 
             _context.Entry(menu).State = EntityState.Modified;
 
@@ -76,8 +90,23 @@ namespace RestaurantServer.API.Controllers
         // POST: api/Menus
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Menu>> PostMenu(Menu menu)
+        public async Task<ActionResult<Menu>> PostMenu(MenuDto menuDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var menu=new Menu
+            {
+                Id = menuDto.Id,
+                CategoryId = menuDto.CategoryId,
+                Title = menuDto.Title,
+                Price= menuDto.Price,
+                Description = menuDto.Description,
+                ImageUrl= menuDto.ImageUrl
+                
+            };
             _context.Menus.Add(menu);
             await _context.SaveChangesAsync();
 
